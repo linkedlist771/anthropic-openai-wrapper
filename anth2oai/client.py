@@ -1,3 +1,4 @@
+# client.py
 from openai import OpenAI, AsyncOpenAI
 
 from openai.resources.chat.chat import AsyncCompletions
@@ -14,6 +15,7 @@ from .format import (
     format_anthropic_response_to_openai_response,
     format_openai_tools_to_anthropic_tools,
     format_anthropic_stream_event_to_openai_chunk,
+    AnthropicStreamState,
 )
 from anthropic.types.message import Message
 from openai.types.chat.chat_completion import ChatCompletion
@@ -158,24 +160,27 @@ class AsyncAnth2OAI(AsyncOpenAI):
         return format_anthropic_response_to_openai_response(anthropic_response)
 
     async def _stream_create(
-        self,
-        messages: list,
-        model: str,
-        system_prompt,
-        tools,
-        max_tokens: int,
-        timeout,
-    ) -> AsyncIterator[ChatCompletionChunk]:
-        """流式请求"""
-        async with self.client.messages.stream(
-            max_tokens=max_tokens,
-            system=system_prompt,
-            messages=messages,
-            model=model,
-            tools=tools,
-            timeout=timeout,
-        ) as stream:
+            self,
+            messages: list,
+            model: str,
+            system_prompt,
+            tools,
+            max_tokens: int,
+            timeout,
+        ) -> AsyncIterator[ChatCompletionChunk]:
+            state = AnthropicStreamState()            
+            stream = await self.client.messages.create(
+                max_tokens=max_tokens,
+                system=system_prompt,
+                messages=messages,
+                model=model,
+                tools=tools,
+                timeout=timeout,
+                stream=True,
+            )
             async for event in stream:
-                chunk = format_anthropic_stream_event_to_openai_chunk(event, model)
+                # logger.debug(event)
+                chunk = format_anthropic_stream_event_to_openai_chunk(event, model, state)
+                # logger.debug(chunk)
                 if chunk:
                     yield chunk

@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from anth2oai.client import AsyncAnth2OAI
 import asyncio
 
+from loguru import logger
 load_dotenv()
 
 client = AsyncAnth2OAI()
@@ -9,21 +10,21 @@ client = AsyncAnth2OAI()
 
 async def main() -> None:
     # ============== Case 1: 普通对话（非流式） ==============
-    # print("=" * 50)
-    # print("Case 1: 普通对话（非流式）")
-    # print("=" * 50)
-    # response = await client.chat.completions.create(
-    #     messages=[
-    #         {"role": "user", "content": "你好， 你是什么模型?"}
-    #     ],
-    #     model="claude-sonnet-4-5-20250929",
-    # )
-    # print(response)
-    # print()
+    print("=" * 50)
+    print("Case 1: 普通对话（非流式）")
+    print("=" * 50)
+    response = await client.chat.completions.create(
+        messages=[
+            {"role": "user", "content": "你好， 你是什么模型?"}
+        ],
+        model="claude-sonnet-4-5-20250929",
+    )
+    print(response)
+    print()
 
-    # # ============== Case 2: 带 Tools（非流式） ==============
-    # print("=" * 50)
-    # print("Case 2: 带 Tools（非流式）")
+    # ============== Case 2: 带 Tools（非流式） ==============
+    print("=" * 50)
+    print("Case 2: 带 Tools（非流式）")
     # print("=" * 50)
     tools = [
         {
@@ -44,15 +45,15 @@ async def main() -> None:
             },
         },
     ]
-    # response = await client.chat.completions.create(
-    #     messages=[
-    #         {"role": "user", "content": "What is my horoscope for Aquarius today?"}
-    #     ],
-    #     model="claude-sonnet-4-5-20250929",
-    #     tools=tools,
-    # )
-    # print(response)
-    # print()
+    response = await client.chat.completions.create(
+        messages=[
+            {"role": "user", "content": "What is my horoscope for Aquarius today?"}
+        ],
+        model="claude-sonnet-4-5-20250929",
+        tools=tools,
+    )
+    print(response)
+    print()
 
     # ============== Case 3: 普通对话（流式） ==============
     print("=" * 50)
@@ -68,13 +69,7 @@ async def main() -> None:
     
     full_content = ""
     async for chunk in stream:
-        if chunk.choices[0].delta.content:
-            content = chunk.choices[0].delta.content
-            print(content, end="", flush=True)
-            full_content += content
-        if chunk.choices[0].finish_reason:
-            print(f"\n[finish_reason: {chunk.choices[0].finish_reason}]")
-    print()
+        logger.debug(chunk)
 
     # ============== Case 4: 带 Tools（流式） ==============
     print("=" * 50)
@@ -91,30 +86,8 @@ async def main() -> None:
     
     tool_calls_data = {}
     async for chunk in stream:
-        delta = chunk.choices[0].delta
+        logger.debug(chunk)
         
-        # 处理文本内容
-        if delta.content:
-            print(f"Content: {delta.content}", end="", flush=True)
-        
-        # 处理 tool_calls
-        if delta.tool_calls:
-            for tool_call in delta.tool_calls:
-                idx = tool_call.get("index", 0)
-                if idx not in tool_calls_data:
-                    tool_calls_data[idx] = {"id": "", "name": "", "arguments": ""}
-                
-                if tool_call.get("id"):
-                    tool_calls_data[idx]["id"] = tool_call["id"]
-                if tool_call.get("function", {}).get("name"):
-                    tool_calls_data[idx]["name"] = tool_call["function"]["name"]
-                if tool_call.get("function", {}).get("arguments"):
-                    tool_calls_data[idx]["arguments"] += tool_call["function"]["arguments"]
-                    print(f"Tool arguments chunk: {tool_call['function']['arguments']}", flush=True)
-        
-        # 处理结束原因
-        if chunk.choices[0].finish_reason:
-            print(f"\n[finish_reason: {chunk.choices[0].finish_reason}]")
     
     if tool_calls_data:
         print(f"Final tool_calls: {tool_calls_data}")
@@ -134,16 +107,14 @@ async def main() -> None:
     )
     
     async for chunk in stream:
-        if chunk.choices[0].delta.content:
-            print(chunk.choices[0].delta.content, end="", flush=True)
-        if chunk.choices[0].finish_reason:
-            print(f"\n[finish_reason: {chunk.choices[0].finish_reason}]")
+        logger.debug(chunk)
     print()
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except Exception as e:
-        from traceback import format_exc
-        print(format_exc())
+    # try:
+    #     asyncio.run(main())
+    # except Exception as e:
+    #     from traceback import format_exc
+    #     print(format_exc())
+    asyncio.run(main())
