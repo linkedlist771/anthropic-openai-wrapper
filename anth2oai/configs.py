@@ -1,0 +1,2 @@
+DEFAULT_ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1"
+DEFAULT_MAX_TOKENS = 1024

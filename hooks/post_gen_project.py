@@ -16,18 +16,26 @@ def remove_dir(filepath: str) -> None:
 
 
 def move_file(filepath: str, target: str) -> None:
-    os.rename(os.path.join(PROJECT_DIRECTORY, filepath), os.path.join(PROJECT_DIRECTORY, target))
+    os.rename(
+        os.path.join(PROJECT_DIRECTORY, filepath),
+        os.path.join(PROJECT_DIRECTORY, target),
+    )
 
 
 def move_dir(src: str, target: str) -> None:
-    shutil.move(os.path.join(PROJECT_DIRECTORY, src), os.path.join(PROJECT_DIRECTORY, target))
+    shutil.move(
+        os.path.join(PROJECT_DIRECTORY, src), os.path.join(PROJECT_DIRECTORY, target)
+    )
 
 
 if __name__ == "__main__":
     if "{{cookiecutter.include_github_actions}}" != "y":
         remove_dir(".github")
     else:
-        if "{{cookiecutter.mkdocs}}" != "y" and "{{cookiecutter.publish_to_pypi}}" == "n":
+        if (
+            "{{cookiecutter.mkdocs}}" != "y"
+            and "{{cookiecutter.publish_to_pypi}}" == "n"
+        ):
             remove_file(".github/workflows/on-release-main.yml")
 
     if "{{cookiecutter.mkdocs}}" != "y":
@@ -90,4 +98,7 @@ if __name__ == "__main__":
     if "{{cookiecutter.layout}}" == "src":
         if os.path.isdir("src"):
             remove_dir("src")
-        move_dir("{{cookiecutter.project_slug}}", os.path.join("src", "{{cookiecutter.project_slug}}"))
+        move_dir(
+            "{{cookiecutter.project_slug}}",
+            os.path.join("src", "{{cookiecutter.project_slug}}"),
+        )
