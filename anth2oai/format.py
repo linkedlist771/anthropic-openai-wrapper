@@ -1,5 +1,4 @@
 # format.py
-from pydantic import BaseModel
 
 from anthropic.types.message import Message
 from openai.types.chat.chat_completion import (
@@ -13,7 +12,7 @@ from openai.types.chat.chat_completion_message_tool_call import (
     ChatCompletionMessageToolCall,
     Function,
 )
-from anthropic.types import Message, TextBlock, ToolUseBlock, Usage
+from anthropic.types import Message, TextBlock, ToolUseBlock
 
 import time
 import json
@@ -26,12 +25,11 @@ from openai.types.chat.chat_completion_chunk import (
     ChoiceDeltaToolCall,
     ChoiceDeltaToolCallFunction,
 )
-import time
 
 
 class AnthropicStreamState:
     """Track state across streaming events for proper OpenAI format conversion."""
-    
+
     def __init__(self):
         self.message_id: str = f"chatcmpl-{int(time.time())}"
         self.current_tool_index: int = -1
@@ -183,7 +181,7 @@ def format_anthropic_stream_event_to_openai_chunk(
                 model=model,
                 object="chat.completion.chunk",
             )
-        
+
         # Thinking delta (if you want to support extended thinking)
         elif delta.type == "thinking_delta":
             # You can choose to emit this as content or skip it
@@ -233,6 +231,7 @@ def _anthropic_stop_to_openai_finish(stop_reason: str) -> str:
 
 
 # ... rest of your existing functions remain the same ...
+
 
 def format_openai_tools_to_anthropic_tools(openai_tools: list | None) -> list | None:
     """

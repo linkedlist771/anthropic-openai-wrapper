@@ -1,14 +1,12 @@
 # client.py
-from openai import OpenAI, AsyncOpenAI
+from openai import AsyncOpenAI, OpenAI
 
-from openai.resources.chat.chat import AsyncCompletions
 
 from anthropic import omit
 from typing_extensions import Literal, overload
-from typing import AsyncIterator
+from typing import AsyncIterator, Iterator
 import os
-import asyncio
-from anthropic import AsyncAnthropic
+from anthropic import AsyncAnthropic, Anthropic
 from loguru import logger
 from .configs import DEFAULT_ANTHROPIC_BASE_URL, DEFAULT_MAX_TOKENS
 from .format import (
@@ -17,15 +15,163 @@ from .format import (
     format_anthropic_stream_event_to_openai_chunk,
     AnthropicStreamState,
 )
-from anthropic.types.message import Message
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
-from typing import Any
-from openai.types.chat.chat_completion_message_tool_call import (
-    ChatCompletionMessageToolCall,
-    Function,
-)
-from anthropic.types import Message, TextBlock, ToolUseBlock, Usage
+
+
+class Anth2OAI(OpenAI):
+    def __init__(self, *args, **kwargs) -> None:
+        api_key = kwargs.get("api_key") or os.environ.get("OPENAI_API_KEY")
+        base_url = kwargs.get("base_url") or os.environ.get("OPENAI_BASE_URL")
+        # default anthropic base url
+        assert api_key, "api_key is required"
+        if not base_url:
+            base_url = DEFAULT_ANTHROPIC_BASE_URL
+            logger.warning(f"Base URL not provided, using default: {base_url}")
+        # TODO: support other params.
+        self.client = Anthropic(
+            api_key=api_key,
+            base_url=base_url,
+        )
+        self.chat = type(
+            "obj",
+            (object,),
+            {"completions": type("obj", (object,), {"create": self.create})()},
+        )()
+
+    @overload
+    def create(
+        self,
+        *,
+        messages: list,
+        model: str,
+        stream: Literal[False] = False,
+        tools: list | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
+        **kwargs,
+    ) -> ChatCompletion: ...
+
+    @overload
+    def create(
+        self,
+        *,
+        messages: list,
+        model: str,
+        stream: Literal[True],
+        tools: list | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
+        **kwargs,
+    ) -> Iterator[ChatCompletionChunk]: ...
+
+    @overload
+    def create(
+        self,
+        *,
+        messages: list,
+        model: str,
+        stream: bool,
+        tools: list | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
+        **kwargs,
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]: ...
+
+    def create(
+        self,
+        *,
+        messages: list | None = None,
+        model: str | None = None,
+        stream: bool = False,
+        tools: list | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
+        **kwargs,
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
+        """
+        Create a chat completion, compatible with OpenAI API (sync version).
+        """
+        messages = messages or kwargs.get("messages")
+        model = model or kwargs.get("model")
+
+        # Convert tools
+        anthropic_tools = format_openai_tools_to_anthropic_tools(tools)
+        anthropic_tools = anthropic_tools or omit
+
+        # Handle timeout and max_tokens
+        # Note: timeout should stay None (not omit) as it's used by HTTP client
+        max_tokens = max_tokens or DEFAULT_MAX_TOKENS
+
+        # Extract system prompt
+        system_prompt = omit
+        messages = list(messages)  # Make a copy to avoid modifying original
+        for i, message in enumerate(messages):
+            if message.get("role") == "system":
+                system_prompt = messages.pop(i).get("content", "")
+                break
+
+        if stream:
+            return self._stream_create(
+                messages=messages,
+                model=model,
+                system_prompt=system_prompt,
+                tools=anthropic_tools,
+                max_tokens=max_tokens,
+                timeout=timeout,
+            )
+        else:
+            return self._non_stream_create(
+                messages=messages,
+                model=model,
+                system_prompt=system_prompt,
+                tools=anthropic_tools,
+                max_tokens=max_tokens,
+                timeout=timeout,
+            )
+
+    def _non_stream_create(
+        self,
+        messages: list,
+        model: str,
+        system_prompt,
+        tools,
+        max_tokens: int,
+        timeout,
+    ) -> ChatCompletion:
+        anthropic_response = self.client.messages.create(
+            max_tokens=max_tokens,
+            system=system_prompt,
+            messages=messages,
+            model=model,
+            tools=tools,
+            timeout=timeout,
+        )
+        return format_anthropic_response_to_openai_response(anthropic_response)
+
+    def _stream_create(
+        self,
+        messages: list,
+        model: str,
+        system_prompt,
+        tools,
+        max_tokens: int,
+        timeout,
+    ) -> Iterator[ChatCompletionChunk]:
+        state = AnthropicStreamState()
+        stream = self.client.messages.create(
+            max_tokens=max_tokens,
+            system=system_prompt,
+            messages=messages,
+            model=model,
+            tools=tools,
+            timeout=timeout,
+            stream=True,
+        )
+        for event in stream:
+            chunk = format_anthropic_stream_event_to_openai_chunk(event, model, state)
+            if chunk:
+                yield chunk
 
 
 class AsyncAnth2OAI(AsyncOpenAI):
@@ -160,27 +306,25 @@ class AsyncAnth2OAI(AsyncOpenAI):
         return format_anthropic_response_to_openai_response(anthropic_response)
 
     async def _stream_create(
-            self,
-            messages: list,
-            model: str,
-            system_prompt,
-            tools,
-            max_tokens: int,
-            timeout,
-        ) -> AsyncIterator[ChatCompletionChunk]:
-            state = AnthropicStreamState()            
-            stream = await self.client.messages.create(
-                max_tokens=max_tokens,
-                system=system_prompt,
-                messages=messages,
-                model=model,
-                tools=tools,
-                timeout=timeout,
-                stream=True,
-            )
-            async for event in stream:
-                # logger.debug(event)
-                chunk = format_anthropic_stream_event_to_openai_chunk(event, model, state)
-                # logger.debug(chunk)
-                if chunk:
-                    yield chunk
+        self,
+        messages: list,
+        model: str,
+        system_prompt,
+        tools,
+        max_tokens: int,
+        timeout,
+    ) -> AsyncIterator[ChatCompletionChunk]:
+        state = AnthropicStreamState()
+        stream = await self.client.messages.create(
+            max_tokens=max_tokens,
+            system=system_prompt,
+            messages=messages,
+            model=model,
+            tools=tools,
+            timeout=timeout,
+            stream=True,
+        )
+        async for event in stream:
+            chunk = format_anthropic_stream_event_to_openai_chunk(event, model, state)
+            if chunk:
+                yield chunk
