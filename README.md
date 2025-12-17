@@ -15,7 +15,7 @@
 
 ## Overview
 
-**anth2oai** is a lightweight wrapper that allows you to use Anthropic's Claude models through an OpenAI-compatible API interface. This makes it easy to switch between OpenAI and Anthropic models in your existing codebase with minimal changes.
+**anth2oai** is a lightweight wrapper that allows you to use Anthropic's Claude models through an OpenAI-compatible API interface. This makes it easy to switch between OpenAI and Anthropic models in your existing codebase with minimal changes. Currently, we support the `chat.completion` interface for both Sync and ASync method, with tool call support.
 
 ### Features
 
@@ -177,44 +177,12 @@ client = AsyncAnth2OAI()  # Will use env variables
 
 ---
 
-## Response Format
+### TODO:
 
-Responses are returned in OpenAI's `ChatCompletion` format:
+- [x] Support Sync and Async interface for `chat.completion`.
+- [ ] Support MultiModal Input.
+- [ ] Suppor the `response` interface.
 
-```python
-ChatCompletion(
-    id='chatcmpl-xxx',
-    choices=[
-        Choice(
-            finish_reason='stop',
-            index=0,
-            message=ChatCompletionMessage(
-                content='Hello! How can I help you today?',
-                role='assistant',
-                tool_calls=None,
-            ),
-        )
-    ],
-    created=1234567890,
-    model='claude-sonnet-4-5-20250929',
-    object='chat.completion',
-    usage=CompletionUsage(
-        completion_tokens=10,
-        prompt_tokens=5,
-        total_tokens=15,
-    ),
-)
-```
-
----
-
-## Supported Models
-
-Any Anthropic model can be used. Common models include:
-
-- `claude-sonnet-4-5-20250929` (Claude 3.5 Sonnet)
-- `claude-3-opus-20240229` (Claude 3 Opus)
-- `claude-3-haiku-20240307` (Claude 3 Haiku)
 
 ---
 
