@@ -1,18 +1,54 @@
 from fastapi import FastAPI, Request, Depends, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from traceback import format_exc
 import uuid
 from copy import deepcopy
 from loguru import logger
 from anth2oai.client import AsyncAnth2OAI
 from anth2oai.authen import validate_api_key
+from anth2oai.database import init_db, close_db, sync_configs_to_env
+from anth2oai.admin_routes import router as admin_router
 import json
 from dotenv import load_dotenv
+import os
+from pathlib import Path
 
 load_dotenv()
-import os
 
-app = FastAPI(docs_url=None, redoc_url=None)
+# Get the directory where this module is located
+MODULE_DIR = Path(__file__).parent.parent
+STATIC_DIR = MODULE_DIR / "front" / "dist"
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan manager."""
+    # Startup
+    await init_db()
+    await sync_configs_to_env()
+    logger.info("Application started")
+    yield
+    # Shutdown
+    await close_db()
+    logger.info("Application shutdown")
+
+
+app = FastAPI(docs_url=None, redoc_url=None, lifespan=lifespan)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include admin routes
+app.include_router(admin_router)
 
 DEFAULT_MAX_TOKENS = 40 * 1024
 
@@ -31,8 +67,8 @@ async def chat_completions(request: Request, api_key: str = Depends(validate_api
 
     try:
         openai_client: AsyncAnth2OAI = AsyncAnth2OAI(
-            api_key=os.environ["ANTHROPIC_API_KEY"],
-            base_url=os.environ["ANTHROPIC_BASE_URL"],
+            api_key=os.environ.get("ANTHROPIC_API_KEY", ""),
+            base_url=os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1"),
         )
 
         if is_stream:
@@ -95,6 +131,24 @@ async def chat_completions(request: Request, api_key: str = Depends(validate_api
         logger.error(f"Error processing request: {e}")
         logger.error(format_exc())
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Serve static files from Vue dist if it exists
+if STATIC_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
+    
+    @app.get("/favicon.ico")
+    async def favicon():
+        favicon_path = STATIC_DIR / "favicon.ico"
+        if favicon_path.exists():
+            return FileResponse(favicon_path)
+        raise HTTPException(status_code=404)
+    
+    @app.get("/admin")
+    @app.get("/admin/{full_path:path}")
+    async def serve_admin(full_path: str = ""):
+        """Serve the Vue admin SPA for all admin routes."""
+        return FileResponse(STATIC_DIR / "index.html")
 
 
 def init_app() -> FastAPI:

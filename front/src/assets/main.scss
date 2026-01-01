@@ -1,0 +1,415 @@
+// Variables
+$primary-color: #1a1a1a;
+$secondary-color: #646cff;
+$bg-color: #ffffff;
+$bg-soft: #f8f8f8;
+$bg-mute: #f2f2f2;
+$text-color: #2c3e50;
+$text-muted: #666;
+$border-color: #e0e0e0;
+$error-color: #dc3545;
+$success-color: #28a745;
+$warning-color: #ffc107;
+
+$border-radius: 12px;
+$border-radius-sm: 8px;
+$shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 4px 24px rgba(0, 0, 0, 0.12);
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin card {
+  background: $bg-color;
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+}
+
+// Reset and base styles
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: $text-color;
+  background: $bg-soft;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+// Form elements
+.form-group {
+  margin-bottom: 1.25rem;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: $text-color;
+  }
+}
+
+.form-input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  background: $bg-soft;
+  transition: all 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: $secondary-color;
+    background: $bg-color;
+    box-shadow: 0 0 0 3px rgba($secondary-color, 0.1);
+  }
+  
+  &::placeholder {
+    color: #999;
+  }
+}
+
+.input-wrapper {
+  position: relative;
+  
+  .toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $text-muted;
+    padding: 0.25rem;
+    
+    &:hover {
+      color: $text-color;
+    }
+  }
+}
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: $primary-color;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background: lighten($primary-color, 10%);
+    transform: translateY(-1px);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+.btn-secondary {
+  background: $bg-mute;
+  color: $text-color;
+  
+  &:hover:not(:disabled) {
+    background: darken($bg-mute, 5%);
+  }
+}
+
+.btn-danger {
+  background: $error-color;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background: darken($error-color, 10%);
+  }
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+// Alerts
+.alert {
+  padding: 1rem;
+  border-radius: $border-radius-sm;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.alert-error {
+  background: rgba($error-color, 0.1);
+  color: $error-color;
+  border: 1px solid rgba($error-color, 0.2);
+}
+
+.alert-success {
+  background: rgba($success-color, 0.1);
+  color: $success-color;
+  border: 1px solid rgba($success-color, 0.2);
+}
+
+// Cards
+.card {
+  @include card;
+  padding: 1.5rem;
+}
+
+// Layout
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+// Sidebar layout
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: $primary-color;
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .nav-menu {
+    list-style: none;
+    flex: 1;
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      border-radius: $border-radius-sm;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      
+      &.router-link-active {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+      
+      .icon {
+        font-size: 1.25rem;
+      }
+    }
+  }
+  
+  .nav-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      margin-bottom: 0.5rem;
+      
+      .avatar {
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        @include flex-center;
+        font-weight: 600;
+      }
+      
+      .username {
+        font-weight: 500;
+      }
+    }
+    
+    .logout-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: none;
+      border-radius: $border-radius-sm;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  
+  .page-header {
+    margin-bottom: 2rem;
+    
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: $text-color;
+    }
+    
+    .subtitle {
+      color: $text-muted;
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+// Config items
+.config-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.config-item {
+  @include card;
+  padding: 1.25rem;
+  
+  .config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    
+    .config-key {
+      font-weight: 600;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.9rem;
+      color: $secondary-color;
+    }
+    
+    .config-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+  
+  .config-description {
+    font-size: 0.875rem;
+    color: $text-muted;
+    margin-bottom: 0.75rem;
+  }
+  
+  .config-value {
+    display: flex;
+    gap: 0.75rem;
+    
+    input {
+      flex: 1;
+    }
+  }
+}
+
+// Loading
+.loading {
+  @include flex-center;
+  padding: 2rem;
+  color: $text-muted;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid $border-color;
+  border-top-color: $secondary-color;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    padding: 1rem;
+    
+    .nav-menu {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      
+      li {
+        margin: 0;
+      }
+    }
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
+}
+
