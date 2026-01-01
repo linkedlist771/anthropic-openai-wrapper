@@ -25,9 +25,15 @@ classifiers = [
 ]
 dependencies = [
     "anthropic>=0.40.0",
-    "openai>=1.0.0",
+    "openai>=1.54.0",
     "loguru>=0.7.0",
     "typing-extensions>=4.0.0",
+    "fastapi[standard]>=0.115.11",
+    "uvicorn>=0.34.0",
+    "gunicorn>=23.0.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "uuid>=1.30",
 ]
 
 [project.optional-dependencies]
