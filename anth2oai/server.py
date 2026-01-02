@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Depends, HTTPException
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import StreamingResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -59,6 +59,12 @@ def process_payload(payload: dict) -> dict:
     return payload
 
 
+@app.get("/")
+async def _():
+    # redirect to login
+    return RedirectResponse(url="/admin")
+
+
 @app.post("/v1/chat/completions")
 async def chat_completions(request: Request, api_key: str = Depends(validate_api_key)):
     body = await request.json()
@@ -68,7 +74,9 @@ async def chat_completions(request: Request, api_key: str = Depends(validate_api
     try:
         openai_client: AsyncAnth2OAI = AsyncAnth2OAI(
             api_key=os.environ.get("ANTHROPIC_API_KEY", ""),
-            base_url=os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1"),
+            base_url=os.environ.get(
+                "ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1"
+            ),
         )
 
         if is_stream:
@@ -136,14 +144,14 @@ async def chat_completions(request: Request, api_key: str = Depends(validate_api
 # Serve static files from Vue dist if it exists
 if STATIC_DIR.exists():
     app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
-    
+
     @app.get("/favicon.ico")
     async def favicon():
         favicon_path = STATIC_DIR / "favicon.ico"
         if favicon_path.exists():
             return FileResponse(favicon_path)
         raise HTTPException(status_code=404)
-    
+
     @app.get("/admin")
     @app.get("/admin/{full_path:path}")
     async def serve_admin(full_path: str = ""):

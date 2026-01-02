@@ -19,16 +19,15 @@ class User(models.Model):
     def verify_password(self, password: str) -> bool:
         """Verify password against stored hash."""
         return bcrypt.checkpw(
-            password.encode('utf-8'), 
-            self.password_hash.encode('utf-8')
+            password.encode("utf-8"), self.password_hash.encode("utf-8")
         )
 
     @staticmethod
     def hash_password(password: str) -> str:
         """Hash a password for storage."""
         salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-        return hashed.decode('utf-8')
+        hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+        return hashed.decode("utf-8")
 
     async def set_password(self, password: str) -> None:
         """Set a new password."""
@@ -68,26 +67,22 @@ class Config(models.Model):
 DEFAULT_CONFIGS = {
     "ANTHROPIC_API_KEY": {
         "value": "",
-        "description": "Anthropic API Key for Claude models",
+        "description": "Anthropic API 密钥（用于访问 Claude 模型）",
     },
     "ANTHROPIC_BASE_URL": {
         "value": "https://api.anthropic.com/v1",
-        "description": "Anthropic API Base URL",
+        "description": "Anthropic API 基础地址",
     },
     "DEFAULT_MAX_TOKENS": {
         "value": "40960",
-        "description": "Default maximum tokens for API responses",
+        "description": "API 响应的默认最大 Token 数量",
     },
     "API_KEY": {
         "value": "",
-        "description": "API Key for accessing this service (leave empty to disable auth)",
+        "description": "访问本服务的 API 密钥（留空则禁用认证）",
     },
     "LOG_LEVEL": {
         "value": "INFO",
-        "description": "Logging level (DEBUG, INFO, WARNING, ERROR)",
-    },
-    "RATE_LIMIT": {
-        "value": "100",
-        "description": "Rate limit per minute (requests)",
+        "description": "日志级别（DEBUG、INFO、WARNING、ERROR）",
     },
 }

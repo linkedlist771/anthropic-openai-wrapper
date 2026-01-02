@@ -22,22 +22,23 @@ from anth2oai.database import sync_configs_to_env
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
-# ==================== Authentication ====================
+# ==================== 认证相关 ====================
+
 
 @router.post("/login", response_model=TokenResponse)
 async def login(request: LoginRequest):
-    """Login and get JWT token."""
+    """登录并获取 JWT Token"""
     user = await User.filter(username=request.username).first()
-    
+
     if not user or not user.verify_password(request.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="用户名或密码错误",
         )
-    
+
     token, expires = create_access_token(user.username)
-    logger.info(f"User {user.username} logged in successfully")
-    
+    logger.info(f"用户 {user.username} 登录成功")
+
     return TokenResponse(
         access_token=token,
         token_type="bearer",
@@ -47,14 +48,14 @@ async def login(request: LoginRequest):
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user: TokenData = Depends(get_current_user)):
-    """Get current user information."""
+    """获取当前用户信息"""
     user = await User.filter(username=current_user.username).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            detail="用户不存在",
         )
-    
+
     return UserResponse(
         id=user.id,
         username=user.username,
@@ -63,37 +64,38 @@ async def get_current_user_info(current_user: TokenData = Depends(get_current_us
     )
 
 
-# ==================== User Management ====================
+# ==================== 用户管理 ====================
+
 
 @router.post("/change-password")
 async def change_password(
     request: ChangePasswordRequest,
     current_user: TokenData = Depends(get_current_user),
 ):
-    """Change current user's password."""
+    """修改当前用户密码"""
     user = await User.filter(username=current_user.username).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            detail="用户不存在",
         )
-    
+
     if not user.verify_password(request.current_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Current password is incorrect",
+            detail="当前密码错误",
         )
-    
+
     if len(request.new_password) < 6:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be at least 6 characters",
+            detail="新密码至少需要6个字符",
         )
-    
+
     await user.set_password(request.new_password)
-    logger.info(f"User {user.username} changed password")
-    
-    return {"message": "Password changed successfully"}
+    logger.info(f"用户 {user.username} 修改了密码")
+
+    return {"message": "密码修改成功"}
 
 
 @router.post("/change-username")
@@ -101,59 +103,60 @@ async def change_username(
     request: ChangeUsernameRequest,
     current_user: TokenData = Depends(get_current_user),
 ):
-    """Change current user's username."""
+    """修改当前用户名"""
     user = await User.filter(username=current_user.username).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            detail="用户不存在",
         )
-    
+
     if not user.verify_password(request.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password is incorrect",
+            detail="密码错误",
         )
-    
-    # Check if new username is already taken
+
+    # 检查新用户名是否已被使用
     existing_user = await User.filter(username=request.new_username).first()
     if existing_user and existing_user.id != user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already taken",
+            detail="用户名已被使用",
         )
-    
+
     if len(request.new_username) < 3:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username must be at least 3 characters",
+            detail="用户名至少需要3个字符",
         )
-    
+
     old_username = user.username
     user.username = request.new_username
     await user.save()
-    logger.info(f"User {old_username} changed username to {request.new_username}")
-    
-    # Return new token with new username
+    logger.info(f"用户 {old_username} 将用户名修改为 {request.new_username}")
+
+    # 返回新的 Token
     token, _ = create_access_token(user.username)
     return {
-        "message": "Username changed successfully",
+        "message": "用户名修改成功",
         "access_token": token,
         "token_type": "bearer",
     }
 
 
-# ==================== Configuration Management ====================
+# ==================== 配置管理 ====================
+
 
 @router.get("/configs", response_model=list[ConfigResponse])
 async def get_all_configs(current_user: TokenData = Depends(get_current_user)):
-    """Get all configuration settings."""
+    """获取所有配置项"""
     configs = await Config.all()
     return [
         ConfigResponse(
             id=c.id,
             key=c.key,
-            value=c.value if c.key != "ANTHROPIC_API_KEY" and c.key != "API_KEY" else mask_secret(c.value),
+            value=c.value,
             description=c.description,
             updated_at=c.updated_at,
         )
@@ -163,18 +166,18 @@ async def get_all_configs(current_user: TokenData = Depends(get_current_user)):
 
 @router.get("/configs/{key}", response_model=ConfigResponse)
 async def get_config(key: str, current_user: TokenData = Depends(get_current_user)):
-    """Get a specific configuration setting."""
+    """获取指定配置项"""
     config = await Config.filter(key=key).first()
     if not config:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Config '{key}' not found",
+            detail=f"配置项 '{key}' 不存在",
         )
-    
+
     return ConfigResponse(
         id=config.id,
         key=config.key,
-        value=config.value if config.key != "ANTHROPIC_API_KEY" and config.key != "API_KEY" else mask_secret(config.value),
+        value=config.value,
         description=config.description,
         updated_at=config.updated_at,
     )
@@ -186,36 +189,28 @@ async def update_config(
     request: ConfigUpdateRequest,
     current_user: TokenData = Depends(get_current_user),
 ):
-    """Update a configuration setting."""
+    """更新配置项"""
     config = await Config.filter(key=key).first()
     if not config:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Config '{key}' not found",
+            detail=f"配置项 '{key}' 不存在",
         )
-    
+
     config.value = request.value
     await config.save()
-    
-    # Sync to environment
+
+    # 同步到环境变量
     os.environ[key] = request.value
-    
-    logger.info(f"Config '{key}' updated by {current_user.username}")
-    
-    return {"message": f"Config '{key}' updated successfully"}
+
+    logger.info(f"配置项 '{key}' 被 {current_user.username} 更新")
+
+    return {"message": f"配置项 '{key}' 更新成功"}
 
 
 @router.post("/configs/sync")
 async def sync_configs(current_user: TokenData = Depends(get_current_user)):
-    """Sync all database configs to environment variables."""
+    """同步所有数据库配置到环境变量"""
     await sync_configs_to_env()
-    logger.info(f"Configs synced to environment by {current_user.username}")
-    return {"message": "Configs synced to environment successfully"}
-
-
-def mask_secret(value: str) -> str:
-    """Mask sensitive values for display."""
-    if not value or len(value) < 8:
-        return "*" * len(value) if value else ""
-    return value[:4] + "*" * (len(value) - 8) + value[-4:]
-
+    logger.info(f"配置已被 {current_user.username} 同步到环境变量")
+    return {"message": "配置已同步到环境变量"}

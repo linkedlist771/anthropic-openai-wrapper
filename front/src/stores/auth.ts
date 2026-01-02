@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
       await fetchUser()
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'Login failed'
+      error.value = err.response?.data?.detail || '登录失败'
       return false
     } finally {
       loading.value = false

@@ -15,7 +15,7 @@ export const useConfigStore = defineStore('config', () => {
       const response = await configApi.getAll()
       configs.value = response.data
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'Failed to fetch configs'
+      error.value = err.response?.data?.detail || '获取配置失败'
     } finally {
       loading.value = false
     }
@@ -34,7 +34,7 @@ export const useConfigStore = defineStore('config', () => {
       }
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'Failed to update config'
+      error.value = err.response?.data?.detail || '更新配置失败'
       return false
     } finally {
       loading.value = false
@@ -48,7 +48,7 @@ export const useConfigStore = defineStore('config', () => {
       await configApi.sync()
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'Failed to sync configs'
+      error.value = err.response?.data?.detail || '同步配置失败'
       return false
     } finally {
       loading.value = false

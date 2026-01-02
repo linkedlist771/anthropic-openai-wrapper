@@ -19,18 +19,21 @@ security = HTTPBearer()
 
 class TokenData(BaseModel):
     """Token payload data."""
+
     username: str
     exp: datetime
 
 
 class LoginRequest(BaseModel):
     """Login request body."""
+
     username: str
     password: str
 
 
 class TokenResponse(BaseModel):
     """Token response."""
+
     access_token: str
     token_type: str = "bearer"
     expires_in: int  # seconds
@@ -38,6 +41,7 @@ class TokenResponse(BaseModel):
 
 class UserResponse(BaseModel):
     """User response without password."""
+
     id: int
     username: str
     created_at: datetime
@@ -65,52 +69,55 @@ def verify_token(token: str) -> Optional[TokenData]:
             exp=datetime.fromtimestamp(payload["exp"]),
         )
     except jwt.ExpiredSignatureError:
-        logger.warning("Token expired")
+        logger.warning("Token 已过期")
         return None
     except jwt.InvalidTokenError as e:
-        logger.warning(f"Invalid token: {e}")
+        logger.warning(f"无效的 Token: {e}")
         return None
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> TokenData:
-    """Dependency to get current authenticated user."""
+    """获取当前已认证的用户"""
     token = credentials.credentials
     token_data = verify_token(token)
-    
+
     if token_data is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Token 无效或已过期",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return token_data
 
 
 class ChangePasswordRequest(BaseModel):
     """Change password request body."""
+
     current_password: str
     new_password: str
 
 
 class ChangeUsernameRequest(BaseModel):
     """Change username request body."""
+
     new_username: str
     password: str  # Current password for verification
 
 
 class ConfigUpdateRequest(BaseModel):
     """Config update request body."""
+
     value: str
 
 
 class ConfigResponse(BaseModel):
     """Config response."""
+
     id: int
     key: str
     value: str
     description: Optional[str]
     updated_at: datetime
-
