@@ -12,5 +12,5 @@ services:
     env_file:
       - .env
     restart: always
-    entrypoint: ["tail", "-f", "/dev/null"]
+    entrypoint: ["python3", "-c", "import time; time.sleep(float('inf'))"]
     # entrypoint: ["/workspace/entrypoint.sh"]
