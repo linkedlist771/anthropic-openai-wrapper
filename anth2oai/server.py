@@ -21,6 +21,13 @@ load_dotenv()
 # Get the directory where this module is located
 MODULE_DIR = Path(__file__).parent.parent
 STATIC_DIR = MODULE_DIR / "front" / "dist"
+if not STATIC_DIR.exists():
+    # not in dev model
+    STATIC_DIR = os.environ.get("STATIC_DIR", "")
+    assert STATIC_DIR, "STATIC_DIR is not set in env"
+    STATIC_DIR = Path(STATIC_DIR)
+    STATIC_DIR.mkdir(exist_ok=True, parents=True)
+
 
 
 @asynccontextmanager

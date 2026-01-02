@@ -1,7 +1,7 @@
 
 services:
   anth2oai_server:
-    image: python:3.13-slim
+    image: llinkedlist/anth2oai_server:latest
     container_name: anth2oai_server
     ports:
       - "8363:8363"
