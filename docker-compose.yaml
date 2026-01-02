@@ -1,7 +1,7 @@
 
 services:
   anth2oai_server:
-    image: ubuntu/python:3.13-25.04
+    image: python:3.13-slim
     container_name: anth2oai_server
     ports:
       - "8363:8363"
