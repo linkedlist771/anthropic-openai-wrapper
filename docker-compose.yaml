@@ -1,0 +1,16 @@
+
+services:
+  anth2oai_server:
+    image: ubuntu/python:3.13-25.04
+    container_name: anth2oai_server
+    ports:
+      - "8363:8363"
+    volumes:
+      - .:/workspace
+      - ./.env:/workspace/.env
+    working_dir: /workspace
+    env_file:
+      - .env
+    restart: always
+    entrypoint: ["tail", "-f", "/dev/null"]
+    # entrypoint: ["/workspace/entrypoint.sh"]
