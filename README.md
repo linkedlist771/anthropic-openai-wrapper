@@ -64,7 +64,7 @@ docker compose up -d
 4. 在Cursor中使用:
 
 完成上述的配置后，就可以选择自定义模型来使用了:
-![img](799e07d9-6aa3-4d9a-94b6-2863df4c886d.png
+![img](assests/799e07d9-6aa3-4d9a-94b6-2863df4c886d.png
 )
 
 
