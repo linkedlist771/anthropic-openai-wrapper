@@ -12,5 +12,5 @@ services:
     env_file:
       - .env
     restart: always
-    entrypoint: ["python3", "-c", "import signal; signal.pause()"]
-    # entrypoint: ["/workspace/entrypoint.sh"]
+    # entrypoint: ["python3", "-c", "import signal; signal.pause()"]
+    entrypoint: ["/workspace/entrypoint.sh"]
