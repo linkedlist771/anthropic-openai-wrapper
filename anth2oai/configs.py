@@ -15,7 +15,6 @@ DEFAULT_MAX_TOKENS = 40960
 
 # Default configuration values (used when not in .env and not in DB)
 DEFAULT_VALUES = {
-    "ANTHROPIC_API_KEY": "",
     "ANTHROPIC_BASE_URL": DEFAULT_ANTHROPIC_BASE_URL,
     "DEFAULT_MAX_TOKENS": str(DEFAULT_MAX_TOKENS),
     "API_KEY": "",
@@ -178,11 +177,6 @@ class ConfigManager:
 
 
 # Convenience functions for common configs
-async def get_anthropic_api_key() -> str:
-    """Get the Anthropic API key."""
-    return await ConfigManager.get("ANTHROPIC_API_KEY")
-
-
 async def get_anthropic_base_url() -> str:
     """Get the Anthropic API base URL."""
     return await ConfigManager.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1")

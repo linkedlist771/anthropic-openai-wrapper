@@ -65,10 +65,6 @@ class Config(models.Model):
 
 # Default configuration keys
 DEFAULT_CONFIGS = {
-    "ANTHROPIC_API_KEY": {
-        "value": "",
-        "description": "Anthropic API 密钥（用于访问 Claude 模型）",
-    },
     "ANTHROPIC_BASE_URL": {
         "value": "https://api.anthropic.com/v1",
         "description": "Anthropic API 基础地址",

@@ -78,14 +78,12 @@ async def chat_completions(request: Request, api_key: str = Depends(validate_api
     is_stream = body.get("stream", False)
 
     try:
-        # Get config from database
-        anthropic_api_key = await ConfigManager.get("ANTHROPIC_API_KEY")
         anthropic_base_url = await ConfigManager.get(
             "ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1"
         )
 
         openai_client: AsyncAnth2OAI = AsyncAnth2OAI(
-            api_key=anthropic_api_key,
+            api_key=api_key,
             base_url=anthropic_base_url,
         )
 

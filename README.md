@@ -184,15 +184,14 @@ if response.choices[0].message.tool_calls:
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `ANTHROPIC_API_KEY` | Anthropic API 密钥 | - |
 | `ANTHROPIC_BASE_URL` | Anthropic API 端点 | `https://api.anthropic.com/v1` |
 | `API_KEY` | 代理服务访问密钥 | - |
 
 ### Web 管理面板
 
 访问 `/admin` 路径可进入管理面板：
-- 配置 Anthropic API Key
 - 设置代理服务访问密钥
+- 配置 API 基础地址
 - 修改管理员账号密码
 
 默认账号密码：`admin` / `admin`（请在首次登录后修改）
@@ -207,7 +206,6 @@ docker build -t anth2oai .
 
 # 运行容器
 docker run -d -p 8000:8000 \
-  -e ANTHROPIC_API_KEY=your-key \
   -e API_KEY=your-access-key \
   anth2oai
 ```
