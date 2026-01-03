@@ -63,8 +63,8 @@ export const configApi = {
   update: (key: string, data: ConfigUpdateRequest) => 
     api.put<MessageResponse>(`/configs/${key}`, data),
   
-  sync: () => 
-    api.post<MessageResponse>('/configs/sync'),
+  refresh: () => 
+    api.post<MessageResponse>('/configs/refresh'),
 }
 
 export default api

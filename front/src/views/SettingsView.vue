@@ -112,7 +112,7 @@ function getUserInitial(): string {
 <template>
   <div class="app-layout">
     <aside class="sidebar">
-      <div class="logo">AI逆向</div>
+      <div class="logo">Anth2OAI</div>
       
       <ul class="nav-menu">
         <li>

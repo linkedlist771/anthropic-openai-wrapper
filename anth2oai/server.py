@@ -4,18 +4,18 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from traceback import format_exc
-import uuid
-from copy import deepcopy
 from loguru import logger
 from anth2oai.client import AsyncAnth2OAI
 from anth2oai.authen import validate_api_key
-from anth2oai.database import init_db, close_db, sync_configs_to_env
+from anth2oai.database import init_db, close_db
 from anth2oai.admin_routes import router as admin_router
+from anth2oai.configs import ConfigManager
 import json
 from dotenv import load_dotenv
 import os
 from pathlib import Path
 
+# Load .env file for initial values (before DB initialization)
 load_dotenv()
 
 # Get the directory where this module is located
@@ -29,13 +29,12 @@ if not STATIC_DIR.exists():
     STATIC_DIR.mkdir(exist_ok=True, parents=True)
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     # Startup
     await init_db()
-    await sync_configs_to_env()
+    await ConfigManager.initialize()
     logger.info("Application started")
     yield
     # Shutdown
@@ -57,12 +56,12 @@ app.add_middleware(
 # Include admin routes
 app.include_router(admin_router)
 
-DEFAULT_MAX_TOKENS = 40 * 1024
 
-
-def process_payload(payload: dict) -> dict:
+async def process_payload(payload: dict) -> dict:
+    """Process request payload, setting defaults from database config."""
     if "max_tokens" not in payload:
-        payload["max_tokens"] = DEFAULT_MAX_TOKENS
+        default_max_tokens = await ConfigManager.get_int("DEFAULT_MAX_TOKENS", 40960)
+        payload["max_tokens"] = default_max_tokens
     return payload
 
 
@@ -75,15 +74,19 @@ async def _():
 @app.post("/v1/chat/completions")
 async def chat_completions(request: Request, api_key: str = Depends(validate_api_key)):
     body = await request.json()
-    body = process_payload(body)
+    body = await process_payload(body)
     is_stream = body.get("stream", False)
 
     try:
+        # Get config from database
+        anthropic_api_key = await ConfigManager.get("ANTHROPIC_API_KEY")
+        anthropic_base_url = await ConfigManager.get(
+            "ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1"
+        )
+
         openai_client: AsyncAnth2OAI = AsyncAnth2OAI(
-            api_key=os.environ.get("ANTHROPIC_API_KEY", ""),
-            base_url=os.environ.get(
-                "ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1"
-            ),
+            api_key=anthropic_api_key,
+            base_url=anthropic_base_url,
         )
 
         if is_stream:

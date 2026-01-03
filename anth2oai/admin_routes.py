@@ -1,6 +1,5 @@
 """Admin API router for authentication and configuration management."""
 
-import os
 from fastapi import APIRouter, HTTPException, Depends, status
 from loguru import logger
 from anth2oai.models import User, Config
@@ -17,7 +16,7 @@ from anth2oai.jwt_auth import (
     get_current_user,
     JWT_EXPIRATION_HOURS,
 )
-from anth2oai.database import sync_configs_to_env
+from anth2oai.configs import ConfigManager
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -189,7 +188,7 @@ async def update_config(
     request: ConfigUpdateRequest,
     current_user: TokenData = Depends(get_current_user),
 ):
-    """更新配置项"""
+    """更新配置项（持久化到数据库）"""
     config = await Config.filter(key=key).first()
     if not config:
         raise HTTPException(
@@ -200,17 +199,17 @@ async def update_config(
     config.value = request.value
     await config.save()
 
-    # 同步到环境变量
-    os.environ[key] = request.value
+    # Update ConfigManager cache
+    await ConfigManager.set(key, request.value)
 
     logger.info(f"配置项 '{key}' 被 {current_user.username} 更新")
 
     return {"message": f"配置项 '{key}' 更新成功"}
 
 
-@router.post("/configs/sync")
-async def sync_configs(current_user: TokenData = Depends(get_current_user)):
-    """同步所有数据库配置到环境变量"""
-    await sync_configs_to_env()
-    logger.info(f"配置已被 {current_user.username} 同步到环境变量")
-    return {"message": "配置已同步到环境变量"}
+@router.post("/configs/refresh")
+async def refresh_configs(current_user: TokenData = Depends(get_current_user)):
+    """刷新配置缓存（从数据库重新加载）"""
+    await ConfigManager.refresh()
+    logger.info(f"配置缓存已被 {current_user.username} 刷新")
+    return {"message": "配置缓存已刷新"}

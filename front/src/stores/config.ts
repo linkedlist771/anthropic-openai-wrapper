@@ -41,14 +41,16 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
-  async function syncConfigs(): Promise<boolean> {
+  async function refreshConfigs(): Promise<boolean> {
     loading.value = true
     error.value = null
     try {
-      await configApi.sync()
+      await configApi.refresh()
+      // Also fetch latest configs from DB
+      await fetchConfigs()
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.detail || '同步配置失败'
+      error.value = err.response?.data?.detail || '刷新配置缓存失败'
       return false
     } finally {
       loading.value = false
@@ -61,7 +63,7 @@ export const useConfigStore = defineStore('config', () => {
     error,
     fetchConfigs,
     updateConfig,
-    syncConfigs,
+    refreshConfigs,
   }
 })
 

@@ -41,7 +41,7 @@ function togglePassword() {
   <div class="login-page">
     <div class="login-container">
       <div class="login-header">
-        <h1>AI逆向</h1>
+        <h1>Anth2OAI</h1>
       </div>
       
       <form @submit.prevent="handleLogin" class="login-form">

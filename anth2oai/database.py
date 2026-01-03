@@ -109,11 +109,3 @@ async def get_config_dict() -> dict:
     """Get all configurations as a dictionary."""
     configs = await Config.all()
     return {c.key: c.value for c in configs}
-
-
-async def sync_configs_to_env():
-    """Sync database configs to environment variables."""
-    configs = await Config.all()
-    for config in configs:
-        if config.value:  # Only set if not empty
-            os.environ[config.key] = config.value

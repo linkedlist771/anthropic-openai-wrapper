@@ -50,13 +50,13 @@ async function saveConfig(key: string) {
   }
 }
 
-async function syncAllConfigs() {
+async function refreshAllConfigs() {
   saveLoading.value = true
-  const success = await configStore.syncConfigs()
+  const success = await configStore.refreshConfigs()
   saveLoading.value = false
   
   if (success) {
-    successMessage.value = '配置已同步到环境变量'
+    successMessage.value = '配置缓存已刷新'
     setTimeout(() => {
       successMessage.value = ''
     }, 3000)
@@ -84,7 +84,7 @@ function getInputType(key: string): string {
 <template>
   <div class="app-layout">
     <aside class="sidebar">
-      <div class="logo">AI逆向</div>
+      <div class="logo">Anth2OAI</div>
       
       <ul class="nav-menu">
         <li>
@@ -127,10 +127,10 @@ function getInputType(key: string): string {
       <div class="actions-bar">
         <button 
           class="btn btn-secondary btn-sm" 
-          @click="syncAllConfigs"
+          @click="refreshAllConfigs"
           :disabled="saveLoading"
         >
-          🔄 同步配置到环境
+          🔄 刷新配置缓存
         </button>
       </div>
       
