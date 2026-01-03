@@ -11,9 +11,6 @@ async def validate_api_key(
 ):
     """
     Validate API key from Authorization header.
-
-    If API_KEY config is empty, authentication is disabled.
-    Otherwise, the provided key must match the configured API_KEY.
     """
 
 

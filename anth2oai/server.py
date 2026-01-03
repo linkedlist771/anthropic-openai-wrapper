@@ -76,7 +76,6 @@ async def chat_completions(request: Request, api_key: str = Depends(validate_api
     body = await request.json()
     body = await process_payload(body)
     is_stream = body.get("stream", False)
-    logger.debug(f"api_key: \n{api_key}")
     try:
         anthropic_base_url = await ConfigManager.get(
             "ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1"

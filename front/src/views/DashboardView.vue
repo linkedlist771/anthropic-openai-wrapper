@@ -68,7 +68,7 @@ function getUserInitial(): string {
 }
 
 function isSecretKey(key: string): boolean {
-  return key.includes('API_KEY') || key.includes('SECRET')
+  return key.includes('SECRET')
 }
 
 function togglePasswordVisibility(key: string) {

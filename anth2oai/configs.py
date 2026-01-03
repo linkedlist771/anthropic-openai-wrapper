@@ -17,7 +17,6 @@ DEFAULT_MAX_TOKENS = 40960
 DEFAULT_VALUES = {
     "ANTHROPIC_BASE_URL": DEFAULT_ANTHROPIC_BASE_URL,
     "DEFAULT_MAX_TOKENS": str(DEFAULT_MAX_TOKENS),
-    "API_KEY": "",
     "LOG_LEVEL": "INFO",
 }
 
@@ -185,11 +184,6 @@ async def get_anthropic_base_url() -> str:
 async def get_default_max_tokens() -> int:
     """Get the default max tokens value."""
     return await ConfigManager.get_int("DEFAULT_MAX_TOKENS", 40960)
-
-
-async def get_api_key() -> str:
-    """Get the API key for this service (for authentication)."""
-    return await ConfigManager.get("API_KEY")
 
 
 async def get_log_level() -> str:

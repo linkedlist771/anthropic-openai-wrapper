@@ -73,10 +73,6 @@ DEFAULT_CONFIGS = {
         "value": "40960",
         "description": "API 响应的默认最大 Token 数量",
     },
-    "API_KEY": {
-        "value": "",
-        "description": "访问本服务的 API 密钥（留空则禁用认证）",
-    },
     "LOG_LEVEL": {
         "value": "INFO",
         "description": "日志级别（DEBUG、INFO、WARNING、ERROR）",
