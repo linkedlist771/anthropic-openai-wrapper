@@ -15,12 +15,7 @@ async def validate_api_key(
     If API_KEY config is empty, authentication is disabled.
     Otherwise, the provided key must match the configured API_KEY.
     """
-    # Get configured API key from database
-    configured_api_key = await ConfigManager.get("API_KEY")
 
-    # If no API key is configured, skip authentication
-    if not configured_api_key:
-        return None
 
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
@@ -29,12 +24,4 @@ async def validate_api_key(
         )
 
     client_api_key = authorization.replace("Bearer ", "")
-
-    # Validate the provided key against configured key
-    if client_api_key != configured_api_key:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid API key",
-        )
-
     return client_api_key
