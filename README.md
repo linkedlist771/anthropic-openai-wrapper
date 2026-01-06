@@ -58,6 +58,7 @@ docker compose up -d
 ![img](assests/a52c48d2-64f9-4ce6-b88b-1f96c519e269.png)
 
 - 填入 Anthropic 兼容的密钥、前面部署的带有公网 IP 的服务地址，以及支持的模型
+> 其中服务url填入`http://$wan_ip:8363/v1`
 
 ![img](assests/9a7f0862-ac18-4433-8a05-c09a3742bb7a.png)
 
