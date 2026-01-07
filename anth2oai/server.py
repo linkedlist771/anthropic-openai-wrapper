@@ -14,6 +14,7 @@ import json
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+from anth2oai.constants import DEFAULT_THIKING_CONFIG
 
 # Load .env file for initial values (before DB initialization)
 load_dotenv()
@@ -57,11 +58,18 @@ app.add_middleware(
 app.include_router(admin_router)
 
 
+
+
 async def process_payload(payload: dict) -> dict:
     """Process request payload, setting defaults from database config."""
     if "max_tokens" not in payload:
         default_max_tokens = await ConfigManager.get_int("DEFAULT_MAX_TOKENS", 40960)
         payload["max_tokens"] = default_max_tokens
+
+    model = payload.get("model")
+    if "thinking" in model:
+        payload["thinking"] = DEFAULT_THIKING_CONFIG
+        logger.debug(f"thinking is enabled with:\n{DEFAULT_THIKING_CONFIG}")    
     return payload
 
 

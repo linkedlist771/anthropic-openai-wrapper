@@ -1,0 +1,1 @@
+DEFAULT_THIKING_CONFIG =  {"type": "enabled", "budget_tokens": 6000}
