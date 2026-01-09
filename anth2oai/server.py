@@ -66,10 +66,13 @@ async def process_payload(payload: dict) -> dict:
         default_max_tokens = await ConfigManager.get_int("DEFAULT_MAX_TOKENS", 40960)
         payload["max_tokens"] = default_max_tokens
 
-    model = payload.get("model")
-    if "thinking" in model:
-        payload["thinking"] = DEFAULT_THIKING_CONFIG
-        logger.debug(f"thinking is enabled with:\n{DEFAULT_THIKING_CONFIG}")    
+    # model = payload.get("model")
+    # if "thinking" in model:
+        
+    #     payload["thinking"] = DEFAULT_THIKING_CONFIG
+    #     logger.debug(f"thinking is enabled with:\n{DEFAULT_THIKING_CONFIG}")    
+    
+    
     return payload
 
 

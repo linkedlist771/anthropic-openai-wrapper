@@ -1,5 +1,5 @@
 # client.py
-from openai import AsyncOpenAI, OpenAI
+from openai import AsyncOpenAI, Omit, OpenAI
 
 
 from anthropic import omit
@@ -17,6 +17,7 @@ from .format import (
 )
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
+from .patch import patch_payload_tools
 
 
 class Anth2OAI(OpenAI):
@@ -250,7 +251,6 @@ class AsyncAnth2OAI(AsyncOpenAI):
         messages = messages or kwargs.get("messages")
         model = model or kwargs.get("model")
         # thinking={"type": "enabled", "budget_tokens": 6000},
-        thinking = kwargs.get("thinking")
 
         # Convert tools
         anthropic_tools = format_openai_tools_to_anthropic_tools(tools)
@@ -267,6 +267,7 @@ class AsyncAnth2OAI(AsyncOpenAI):
             if message.get("role") == "system":
                 system_prompt = messages.pop(i).get("content", "")
                 break
+        anthropic_tools = patch_payload_tools(anthropic_tools)
 
         if stream:
             return self._stream_create(
@@ -276,7 +277,6 @@ class AsyncAnth2OAI(AsyncOpenAI):
                 tools=anthropic_tools,
                 max_tokens=max_tokens,
                 timeout=timeout,
-                thinking=thinking,
             )
         else:
             return await self._non_stream_create(
@@ -286,7 +286,6 @@ class AsyncAnth2OAI(AsyncOpenAI):
                 tools=anthropic_tools,
                 max_tokens=max_tokens,
                 timeout=timeout,
-                thinking=thinking,
             )
 
     async def _non_stream_create(
@@ -297,7 +296,6 @@ class AsyncAnth2OAI(AsyncOpenAI):
         tools,
         max_tokens: int,
         timeout,
-        thinking,
     ) -> ChatCompletion:
         """非流式请求"""
         anthropic_response = await self.client.messages.create(
@@ -307,7 +305,6 @@ class AsyncAnth2OAI(AsyncOpenAI):
             model=model,
             tools=tools,
             timeout=timeout,
-            thinking=thinking,
         )
         return format_anthropic_response_to_openai_response(anthropic_response)
 
@@ -319,7 +316,6 @@ class AsyncAnth2OAI(AsyncOpenAI):
         tools,
         max_tokens: int,
         timeout,
-        thinking,
     ) -> AsyncIterator[ChatCompletionChunk]:
         state = AnthropicStreamState()
         stream = await self.client.messages.create(
@@ -330,7 +326,6 @@ class AsyncAnth2OAI(AsyncOpenAI):
             tools=tools,
             timeout=timeout,
             stream=True,
-            thinking=thinking,
         )
         async for event in stream:
             chunk = format_anthropic_stream_event_to_openai_chunk(event, model, state)

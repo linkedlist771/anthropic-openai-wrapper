@@ -25,6 +25,7 @@ from openai.types.chat.chat_completion_chunk import (
     ChoiceDeltaToolCall,
     ChoiceDeltaToolCallFunction,
 )
+from .patch import TOOL_PATCH_PREFIX
 
 
 class AnthropicStreamState:
@@ -85,6 +86,8 @@ def format_anthropic_stream_event_to_openai_chunk(
         # Tool use start
         if content_block.type == "tool_use":
             state.current_tool_index += 1
+            function_name = content_block.name
+            function_name = function_name.replace(TOOL_PATCH_PREFIX, "")
             return ChatCompletionChunk(
                 id=state.message_id,
                 choices=[
@@ -98,7 +101,8 @@ def format_anthropic_stream_event_to_openai_chunk(
                                     id=content_block.id,
                                     type="function",
                                     function=ChoiceDeltaToolCallFunction(
-                                        name=content_block.name,
+                                        # name=content_block.name,
+                                        name=function_name,
                                         arguments="",
                                     ),
                                 )
@@ -111,6 +115,7 @@ def format_anthropic_stream_event_to_openai_chunk(
                 model=model,
                 object="chat.completion.chunk",
             )
+
 
         # Text block start - only send role if not already sent
         elif content_block.type == "text":
