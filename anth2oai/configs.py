@@ -7,6 +7,7 @@ Web interface modifications update the database directly.
 
 import os
 from typing import Optional
+
 from loguru import logger
 
 # Legacy constants for backward compatibility (used by client.py as a standalone library)

@@ -1,7 +1,8 @@
 # gunicorn.conf.py
 
-import os
 import multiprocessing
+import os
+
 from dotenv import load_dotenv
 
 load_dotenv()

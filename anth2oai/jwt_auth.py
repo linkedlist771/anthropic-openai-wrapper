@@ -1,13 +1,14 @@
 """JWT Authentication module for admin panel."""
 
 import os
-import jwt
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import HTTPException, Depends, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
+
+import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
+from pydantic import BaseModel
 
 # JWT Configuration
 JWT_SECRET = os.environ.get("JWT_SECRET", "your-secret-key-change-in-production")

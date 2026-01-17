@@ -1,8 +1,9 @@
-from dotenv import load_dotenv
-from anth2oai.client import AsyncAnth2OAI
 import asyncio
 
+from dotenv import load_dotenv
 from loguru import logger
+
+from anth2oai.client import AsyncAnth2OAI
 
 load_dotenv()
 

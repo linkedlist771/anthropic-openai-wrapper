@@ -1,6 +1,4 @@
-
 TOOL_PATCH_PREFIX = "op_"
-
 
 
 def patch_payload_tools(tools: list[dict]) -> list[dict]:
@@ -10,4 +8,3 @@ def patch_payload_tools(tools: list[dict]) -> list[dict]:
             name = f"{TOOL_PATCH_PREFIX}{name}"
             tool["name"] = name
     return tools
-    

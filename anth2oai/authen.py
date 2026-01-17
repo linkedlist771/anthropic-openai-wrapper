@@ -2,6 +2,7 @@ from typing import Optional
 
 from fastapi import Header, HTTPException, Request
 from loguru import logger
+
 from anth2oai.configs import ConfigManager
 
 
@@ -12,7 +13,6 @@ async def validate_api_key(
     """
     Validate API key from Authorization header.
     """
-
 
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(

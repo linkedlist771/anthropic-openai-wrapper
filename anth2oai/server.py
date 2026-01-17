@@ -1,20 +1,24 @@
-from fastapi import FastAPI, Request, Depends, HTTPException
-from fastapi.responses import StreamingResponse, FileResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-from traceback import format_exc
-from loguru import logger
-from anth2oai.client import AsyncAnth2OAI
-from anth2oai.authen import validate_api_key
-from anth2oai.database import init_db, close_db
-from anth2oai.admin_routes import router as admin_router
-from anth2oai.configs import ConfigManager
 import json
-from dotenv import load_dotenv
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
-from anth2oai.constants import DEFAULT_THIKING_CONFIG
+from traceback import format_exc
+
+import httpx
+from anthropic._constants import DEFAULT_TIMEOUT
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from loguru import logger
+
+from anth2oai.admin_routes import router as admin_router
+from anth2oai.authen import validate_api_key
+from anth2oai.client import AsyncAnth2OAI
+from anth2oai.configs import ConfigManager
+from anth2oai.constants import DEFAULT_HTTP_CLIENT_HEADERS, DEFAULT_THIKING_CONFIG
+from anth2oai.database import close_db, init_db
 
 # Load .env file for initial values (before DB initialization)
 load_dotenv()
@@ -58,8 +62,6 @@ app.add_middleware(
 app.include_router(admin_router)
 
 
-
-
 async def process_payload(payload: dict) -> dict:
     """Process request payload, setting defaults from database config."""
     if "max_tokens" not in payload:
@@ -68,11 +70,10 @@ async def process_payload(payload: dict) -> dict:
 
     # model = payload.get("model")
     # if "thinking" in model:
-        
+
     #     payload["thinking"] = DEFAULT_THIKING_CONFIG
-    #     logger.debug(f"thinking is enabled with:\n{DEFAULT_THIKING_CONFIG}")    
-    
-    
+    #     logger.debug(f"thinking is enabled with:\n{DEFAULT_THIKING_CONFIG}")
+
     return payload
 
 
@@ -91,10 +92,16 @@ async def chat_completions(request: Request, api_key: str = Depends(validate_api
         anthropic_base_url = await ConfigManager.get(
             "ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1"
         )
-
+        http_client = httpx.AsyncClient(
+            headers=DEFAULT_HTTP_CLIENT_HEADERS,
+            base_url=anthropic_base_url,
+            timeout=DEFAULT_TIMEOUT,
+        )
+        # DEFAULT_HTTP_CLIENT_HEADERS
         openai_client: AsyncAnth2OAI = AsyncAnth2OAI(
             api_key=api_key,
             base_url=anthropic_base_url,
+            http_client=http_client,
         )
 
         if is_stream:

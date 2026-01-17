@@ -1,10 +1,12 @@
 """Database initialization and connection management."""
 
-import os
 import asyncio
-from tortoise import Tortoise
+import os
+
 from loguru import logger
-from anth2oai.models import User, Config, DEFAULT_CONFIGS
+from tortoise import Tortoise
+
+from anth2oai.models import DEFAULT_CONFIGS, Config, User
 
 # Global flag to track if DB is initialized (for multi-worker scenarios)
 _db_initialized = False

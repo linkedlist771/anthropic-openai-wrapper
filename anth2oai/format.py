@@ -1,5 +1,10 @@
 # format.py
 
+import json
+import time
+from typing import Any, Optional
+
+from anthropic.types import Message, TextBlock, ToolUseBlock
 from anthropic.types.message import Message
 from openai.types.chat.chat_completion import (
     ChatCompletion,
@@ -7,24 +12,20 @@ from openai.types.chat.chat_completion import (
     Choice,
     CompletionUsage,
 )
-from typing import Any, Optional
-from openai.types.chat.chat_completion_message_tool_call import (
-    ChatCompletionMessageToolCall,
-    Function,
-)
-from anthropic.types import Message, TextBlock, ToolUseBlock
-
-import time
-import json
-
-
 from openai.types.chat.chat_completion_chunk import (
     ChatCompletionChunk,
-    Choice as ChunkChoice,
     ChoiceDelta,
     ChoiceDeltaToolCall,
     ChoiceDeltaToolCallFunction,
 )
+from openai.types.chat.chat_completion_chunk import (
+    Choice as ChunkChoice,
+)
+from openai.types.chat.chat_completion_message_tool_call import (
+    ChatCompletionMessageToolCall,
+    Function,
+)
+
 from .patch import TOOL_PATCH_PREFIX
 
 
@@ -115,7 +116,6 @@ def format_anthropic_stream_event_to_openai_chunk(
                 model=model,
                 object="chat.completion.chunk",
             )
-
 
         # Text block start - only send role if not already sent
         elif content_block.type == "text":

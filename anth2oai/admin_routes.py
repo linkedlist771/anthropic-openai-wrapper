@@ -1,22 +1,23 @@
 """Admin API router for authentication and configuration management."""
 
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from loguru import logger
-from anth2oai.models import User, Config
+
+from anth2oai.configs import ConfigManager
 from anth2oai.jwt_auth import (
-    LoginRequest,
-    TokenResponse,
-    UserResponse,
+    JWT_EXPIRATION_HOURS,
     ChangePasswordRequest,
     ChangeUsernameRequest,
-    ConfigUpdateRequest,
     ConfigResponse,
+    ConfigUpdateRequest,
+    LoginRequest,
     TokenData,
+    TokenResponse,
+    UserResponse,
     create_access_token,
     get_current_user,
-    JWT_EXPIRATION_HOURS,
 )
-from anth2oai.configs import ConfigManager
+from anth2oai.models import Config, User
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 

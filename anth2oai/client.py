@@ -1,22 +1,21 @@
 # client.py
-from openai import AsyncOpenAI, Omit, OpenAI
-
-
-from anthropic import omit
-from typing_extensions import Literal, overload
-from typing import AsyncIterator, Iterator
 import os
-from anthropic import AsyncAnthropic, Anthropic
+from typing import AsyncIterator, Iterator
+
+from anthropic import Anthropic, AsyncAnthropic, omit
 from loguru import logger
-from .configs import DEFAULT_ANTHROPIC_BASE_URL, DEFAULT_MAX_TOKENS
-from .format import (
-    format_anthropic_response_to_openai_response,
-    format_openai_tools_to_anthropic_tools,
-    format_anthropic_stream_event_to_openai_chunk,
-    AnthropicStreamState,
-)
+from openai import AsyncOpenAI, Omit, OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
+from typing_extensions import Literal, overload
+
+from .configs import DEFAULT_ANTHROPIC_BASE_URL, DEFAULT_MAX_TOKENS
+from .format import (
+    AnthropicStreamState,
+    format_anthropic_response_to_openai_response,
+    format_anthropic_stream_event_to_openai_chunk,
+    format_openai_tools_to_anthropic_tools,
+)
 from .patch import patch_payload_tools
 
 
@@ -24,15 +23,19 @@ class Anth2OAI(OpenAI):
     def __init__(self, *args, **kwargs) -> None:
         api_key = kwargs.get("api_key") or os.environ.get("OPENAI_API_KEY")
         base_url = kwargs.get("base_url") or os.environ.get("OPENAI_BASE_URL")
+
+        http_client = kwargs.get("http_client", None)
         # default anthropic base url
         assert api_key, "api_key is required"
         if not base_url:
             base_url = DEFAULT_ANTHROPIC_BASE_URL
             logger.warning(f"Base URL not provided, using default: {base_url}")
         # TODO: support other params.
+
         self.client = Anthropic(
             api_key=api_key,
             base_url=base_url,
+            http_client=http_client,
         )
         self.chat = type(
             "obj",
@@ -179,6 +182,7 @@ class AsyncAnth2OAI(AsyncOpenAI):
     def __init__(self, *args, **kwargs) -> None:
         api_key = kwargs.get("api_key") or os.environ.get("OPENAI_API_KEY")
         base_url = kwargs.get("base_url") or os.environ.get("OPENAI_BASE_URL")
+        http_client = kwargs.get("http_client", None)
         # default anthropic base url
         assert api_key, "api_key is required"
         if not base_url:
@@ -188,6 +192,7 @@ class AsyncAnth2OAI(AsyncOpenAI):
         self.client = AsyncAnthropic(
             api_key=api_key,
             base_url=base_url,
+            http_client=http_client,
         )
         self.chat = type(
             "obj",

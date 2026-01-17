@@ -1,7 +1,7 @@
 """Database models for admin panel using Tortoise ORM."""
 
-from tortoise import fields, models
 import bcrypt
+from tortoise import fields, models
 
 
 class User(models.Model):
