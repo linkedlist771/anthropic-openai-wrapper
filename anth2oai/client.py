@@ -10,6 +10,7 @@ from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from typing_extensions import Literal, overload
 
 from .configs import DEFAULT_ANTHROPIC_BASE_URL, DEFAULT_MAX_TOKENS
+from .constants import DEFAULT_HTTP_CLIENT_HEADERS
 from .format import (
     AnthropicStreamState,
     format_anthropic_response_to_openai_response,
@@ -193,6 +194,7 @@ class AsyncAnth2OAI(AsyncOpenAI):
             api_key=api_key,
             base_url=base_url,
             http_client=http_client,
+            default_headers=DEFAULT_HTTP_CLIENT_HEADERS,
         )
         self.chat = type(
             "obj",
