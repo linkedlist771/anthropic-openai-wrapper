@@ -8,6 +8,13 @@ Web interface modifications update the database directly.
 from typing import Optional
 
 from loguru import logger
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).parent.parent
+
+LOGS_DIR = ROOT_DIR / "logs"
+LOGS_DIR.mkdir(exist_ok=True, parents=True)
+logger.add(LOGS_DIR / "anth2oai.log", rotation="100 MB", retention="10 days")
 
 # Legacy constants for backward compatibility (used by client.py as a standalone library)
 DEFAULT_ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1"

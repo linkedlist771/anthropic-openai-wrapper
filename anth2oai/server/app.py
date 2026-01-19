@@ -38,6 +38,7 @@ async def lifespan(app: FastAPI):
     # Startup
     await init_db()
     await ConfigManager.initialize()
+    
     logger.info("Application started")
     yield
     # Shutdown
