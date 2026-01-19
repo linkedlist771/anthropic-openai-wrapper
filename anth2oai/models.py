@@ -69,6 +69,10 @@ DEFAULT_CONFIGS = {
         "value": "https://api.anthropic.com/v1",
         "description": "Anthropic API 基础地址",
     },
+    "OPENAI_BASE_URL": {
+        "value": "https://api.openai.com/v1",
+        "description": "OpenAI API 基础地址（用于 Codex 适配器）",
+    },
     "DEFAULT_MAX_TOKENS": {
         "value": "40960",
         "description": "API 响应的默认最大 Token 数量",
