@@ -38,7 +38,11 @@ async def codex_streaming(api_key: str, body: dict):
     }
     from loguru import logger
     import json
+    from pathlib import Path
+    saving_path = Path("/workspace/debug.json")
     logger.debug(json.dumps(params, indent=4))
+    with saving_path.open("w") as f:
+        f.write(json.dumps(params, indent=4) + "\n")
 
     async def _stream_response():
         async for chunk in await acompletion(
