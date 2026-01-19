@@ -2,7 +2,7 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from traceback import format_exc
-from typing import AwaitableGenerator
+# from typing import AwaitableGenerator
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -70,7 +70,7 @@ async def process_payload(payload: dict) -> dict:
 
 async def dispatch_request(api_key: str, body: dict):
     model = body.get("model", "").lower()
-    request_cls: AwaitableGenerator = None
+    request_cls = None
     if "claude" in model:
         request_cls = claude_streaming
     elif "codex" in model or "gpt" in model:
