@@ -11,6 +11,7 @@ from anth2oai.constants import (
 import litellm
 CODEX_RESPONSES_PREFIX = "openai/responses/"
 litellm.drop_params = True
+litellm.verbose = True
 
 
 async def codex_streaming(api_key: str, body: dict):
@@ -25,6 +26,7 @@ async def codex_streaming(api_key: str, body: dict):
         raise HTTPException(
             f"OPENAI_BASE_URL is not set, set it in env or the database"
         )
+
 
     async def _stream_response():
         async for chunk in await acompletion(
