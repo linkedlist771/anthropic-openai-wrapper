@@ -8,16 +8,47 @@ from anth2oai.configs import ConfigManager
 from anth2oai.constants import (
     STREAMING_HEADERS,
 )
-import litellm
+
 CODEX_RESPONSES_PREFIX = "openai/responses/"
-litellm.drop_params = True
-litellm.verbose = True
+# import litellm
+
+# litellm.drop_params = True
+# litellm.verbose = True
+
+
+def format_responses_tools_to_chat_completion(tools: list[dict]) -> list[dict]:
+    converted_tools = []
+
+    for tool in tools:
+        tool_type = tool.get("type")
+        if tool_type == "function" and "function" in tool:
+            converted_tools.append(tool)
+            continue
+        if tool_type in ("function", "custom"):
+            converted_tools.append(
+                {
+                    "type": "function",
+                    "function": {
+                        "name": tool.get("name"),
+                        "description": tool.get("description"),
+                        "parameters": tool.get(
+                            "parameters", {"type": "object", "properties": {}}
+                        ),
+                        **({"strict": tool["strict"]} if "strict" in tool else {}),
+                    },
+                }
+            )
+        else:
+            converted_tools.append(tool)
+
+    return converted_tools
 
 
 async def codex_streaming(api_key: str, body: dict):
     model_name = body.get("model", "").lower()
     messages = body.get("messages", [])
     tools = body.get("tools", [])
+    tools = format_responses_tools_to_chat_completion(tools)
     if not model_name.startswith(CODEX_RESPONSES_PREFIX):
         model_name = CODEX_RESPONSES_PREFIX + model_name
 
@@ -36,13 +67,14 @@ async def codex_streaming(api_key: str, body: dict):
         "base_url": openai_base_url,
         "stream": True,
     }
-    from loguru import logger
-    import json
-    from pathlib import Path
-    saving_path = Path("/workspace/debug.json")
-    logger.debug(json.dumps(params, indent=4))
-    with saving_path.open("w") as f:
-        f.write(json.dumps(params, indent=4) + "\n")
+    # from loguru import logger
+    # import json
+    # from pathlib import Path
+
+    # saving_path = Path("/workspace/debug.json")
+    # logger.debug(json.dumps(params, indent=4))
+    # with saving_path.open("w") as f:
+    #     f.write(json.dumps(params, indent=4) + "\n")
 
     async def _stream_response():
         async for chunk in await acompletion(

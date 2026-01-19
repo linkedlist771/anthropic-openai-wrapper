@@ -2,8 +2,8 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from traceback import format_exc
-# from typing import AwaitableGenerator
 
+# from typing import AwaitableGenerator
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,6 +60,7 @@ app.add_middleware(
 app.include_router(admin_router)
 
 MODEL_CUSTOM_PREFIX = "custom-"
+
 
 async def process_payload(payload: dict) -> dict:
     """Process request payload, setting defaults from database config."""

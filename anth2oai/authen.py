@@ -3,7 +3,6 @@ from typing import Optional
 from fastapi import Header, HTTPException, Request
 
 
-
 async def validate_api_key(
     raw_request: Request,
     authorization: Optional[str] = Header(None),  # codex
