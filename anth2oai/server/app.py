@@ -113,9 +113,6 @@ async def chat_completions(request: Request, api_key: str = Depends(validate_api
             #     response_dict = response
 
             # return response_dict
-
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"Error processing request: {e}")
         logger.error(format_exc())
