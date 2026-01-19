@@ -59,12 +59,17 @@ app.add_middleware(
 # Include admin routes
 app.include_router(admin_router)
 
+MODEL_CUSTOM_PREFIX = "custom-"
 
 async def process_payload(payload: dict) -> dict:
     """Process request payload, setting defaults from database config."""
     if "max_tokens" not in payload:
         default_max_tokens = await ConfigManager.get_int("DEFAULT_MAX_TOKENS", 40960)
         payload["max_tokens"] = default_max_tokens
+
+    model = payload.get("model", "").lower()
+    model = model.removeprefix(MODEL_CUSTOM_PREFIX)
+    payload["model"] = model
     return payload
 
 
