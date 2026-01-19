@@ -8,8 +8,9 @@ from anth2oai.configs import ConfigManager
 from anth2oai.constants import (
     STREAMING_HEADERS,
 )
-
+import litellm
 CODEX_RESPONSES_PREFIX = "openai/responses/"
+litellm.drop_params = True
 
 
 async def codex_streaming(api_key: str, body: dict):
