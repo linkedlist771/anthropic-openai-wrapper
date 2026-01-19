@@ -27,6 +27,18 @@ async def codex_streaming(api_key: str, body: dict):
             f"OPENAI_BASE_URL is not set, set it in env or the database"
         )
 
+    params = {
+        "model": model_name,
+        "messages": messages,
+        "tools": tools,
+        "tool_choice": "auto",
+        "api_key": api_key,
+        "base_url": openai_base_url,
+        "stream": True,
+    }
+    from loguru import logger
+    import json
+    logger.debug(json.dumps(params, indent=4))
 
     async def _stream_response():
         async for chunk in await acompletion(
