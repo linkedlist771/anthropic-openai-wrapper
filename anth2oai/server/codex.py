@@ -58,15 +58,15 @@ async def codex_streaming(api_key: str, body: dict):
             f"OPENAI_BASE_URL is not set, set it in env or the database"
         )
 
-    params = {
-        "model": model_name,
-        "messages": messages,
-        "tools": tools,
-        "tool_choice": "auto",
-        "api_key": api_key,
-        "base_url": openai_base_url,
-        "stream": True,
-    }
+    # params = {
+    #     "model": model_name,
+    #     "messages": messages,
+    #     "tools": tools,
+    #     "tool_choice": "auto",
+    #     "api_key": api_key,
+    #     "base_url": openai_base_url,
+    #     "stream": True,
+    # }
     # from loguru import logger
     # import json
     # from pathlib import Path
@@ -81,7 +81,7 @@ async def codex_streaming(api_key: str, body: dict):
             model=model_name,
             messages=messages,
             tools=tools,
-            tool_choice="auto",
+            # tool_choice="auto",
             api_key=api_key,
             base_url=openai_base_url,
             # Literal["none", "minimal", "low", "medium", "high", "xhigh", "default"]
