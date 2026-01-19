@@ -4,7 +4,7 @@ from typing import AsyncIterator, Iterator
 
 from anthropic import Anthropic, AsyncAnthropic, omit
 from loguru import logger
-from openai import AsyncOpenAI, Omit, OpenAI
+from openai import AsyncOpenAI, OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 from typing_extensions import Literal, overload

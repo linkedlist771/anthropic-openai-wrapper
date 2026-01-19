@@ -1,9 +1,7 @@
 from typing import Optional
 
 from fastapi import Header, HTTPException, Request
-from loguru import logger
 
-from anth2oai.configs import ConfigManager
 
 
 async def validate_api_key(

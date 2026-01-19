@@ -5,7 +5,6 @@ Initial values are loaded from .env file when the config doesn't exist in DB.
 Web interface modifications update the database directly.
 """
 
-import os
 from typing import Optional
 
 from loguru import logger
